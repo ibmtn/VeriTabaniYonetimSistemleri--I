@@ -1,0 +1,104 @@
+--create database Library;
+
+use Library;
+create table uyeler(
+uye_no int NOT NULL identity(1,1) Primary Key,
+uye_adı nvarchar(100) NOT NULL,
+uye_soyadı nvarchar(100) NOT NULL,
+e_posta nvarchar(100),
+cinsiyet nvarchar(100),
+telefon nvarchar(100),
+adres_no int Foreign Key (adres_no) REFERENCES adresler(adres_no),
+);
+
+
+
+use Library;
+create table adresler(
+adres_no int NOT NULL identity(1,1) Primary Key,
+sehir nvarchar(100) NOT NULL,
+mahalle nvarchar(100) NOT NULL,
+bina_no int,
+cadde nvarchar(100),
+posta_kodu int,
+ulke nvarchar(100) NOT NULL,
+);
+
+
+use Library;
+create table kutuphane(
+kutuphane_no int NOT NULL identity(1,1) Primary Key,
+kutuphane_ismi nvarchar(100) NOT NULL,
+aciklama nvarchar(200),
+adres_no int Foreign Key (adres_no) REFERENCES adresler(adres_no),
+);
+
+
+
+use Library;
+create table emanet(
+emanet_no int NOT NULL identity(1,1) Primary Key,
+emanet_tarihi nvarchar(50) NOT NULL,
+teslim_tarihi nvarchar(50) NOT NULL,
+uye_no int Foreign Key (uye_no) REFERENCES uyeler(uye_no),
+kutuphane_no int Foreign Key (kutuphane_no) REFERENCES kutuphane(kutuphane_no),
+ISBN int Foreign Key (ISBN) REFERENCES kitaplar(ISBN),
+);
+
+
+
+
+use Library;
+create table kitaplar(
+ISBN int NOT NULL identity(1,1) Primary Key,
+sayfa_sayisi int NOT NULL,
+kitap_adi nvarchar(100) NOT NULL,
+yayin_tarihi nvarchar(100) NOT NULL,
+);
+
+
+
+
+use Library;
+create table kitap_kutuphane(
+miktar int NOT NULL Primary Key,
+ISBN int Foreign Key (ISBN) REFERENCES kitaplar(ISBN),
+kutuphane_no int Foreign Key (kutuphane_no) REFERENCES kutuphane(kutuphane_no),
+);
+
+
+
+
+
+use Library;
+create table kitap_kategori(
+ISBN int Foreign Key (ISBN) REFERENCES kitaplar(ISBN),
+kategori_no int Foreign Key (kategori_no) REFERENCES kategoriler(kategori_no),
+);
+
+
+
+
+use Library;
+create table kategoriler(
+kategori_no int NOT NULL identity(1,1) Primary Key,
+kategori_adi nvarchar(100) NOT NULL,
+);
+
+
+
+
+use Library;
+create table kitap_yazar(
+ISBN int Foreign Key (ISBN) REFERENCES kitaplar(ISBN),
+yazar_no int Foreign Key (yazar_no) REFERENCES yazar(yazar_no),
+);
+
+
+
+
+use Library;
+create table yazar(
+yazar_no int NOT NULL identity(1,1) Primary Key,
+yazar_Adi nvarchar(100) NOT NULL, 
+);
