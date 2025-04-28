@@ -1,0 +1,78 @@
+--create database galeri;
+
+use galeri
+create table musteri(
+Mno int primary key identity(1,1),
+Madi nvarchar(50),
+Msoyadi nvarchar(50),
+Madres nvarchar(50),
+Mtelefon nvarchar(50)
+);
+
+create table araclar(
+Aracno int identity(1,1) primary key,
+yil int,
+model nvarchar(50),
+marka nvarchar(50),
+plaka nvarchar(50),
+fiyat float
+);
+
+create table satislar(
+satisNo int primary key Not Null,
+MNo int foreign key (Mno) references musteri(Mno),
+AracNo int foreign key (Aracno) references araclar(Aracno),
+SatisTarihi datetime,
+Fiyat float,
+);
+
+create table alislar(
+alisNo int primary key Not Null,
+MNo int foreign key (Mno) references musteri(Mno),
+AracNo int foreign key (Aracno) references araclar(Aracno),
+AlisTarihi datetime,
+Fiyat float,
+);
+
+
+
+insert into musteri values('Fatma Nur', 'Kılıçkaya', 'Kayseri', '45667')
+insert into musteri values('İbrahim', 'Metin', 'İstanbul', '458445')
+insert into musteri values('Sıla', 'Aydoğdu', 'Ankara', '56845')
+insert into musteri values('Mustafa', 'Erdoğan', 'İzmir', '14545')
+select * from musteri
+
+
+insert into araclar values('2010', 'benz', 'mercedes', '38AAA256', '1000000')
+insert into araclar values('2011', 'Cobra-II', 'otokar', '38ABA255', '1100000')
+insert into araclar values('2013', 'Kirpi-II', 'BMC', '38ABC155', '2000000')
+insert into araclar values('2013', 'ARMA-8x8', 'otokar', '38ABC155', '2000000')
+select * from araclar
+
+
+insert into satislar values(1, 1, 1, '2010', '2000500')
+insert into satislar values(2, 2, 4, '2015', '1100000')
+insert into satislar values(3, 3, 2, '2016', '1200000')
+select * from satislar
+
+
+insert into alislar values(1, 2, 1, '2010', '1000500')
+insert into alislar values(2, 4, 3, '2012', '1000500')
+insert into alislar values(3, 2, 4, '2012', '1000500')
+select * from alislar
+
+
+-- 1.Satış yapılan müşterilerin isimlerini listelemek için gerekli SQL ifadesini yazınız.
+select  M.Madi, M.Msoyadi
+from satislar s
+join musteri m on M.Mno = s.Mno
+
+-- 2.Hangi müşteriden hangi aracın alındığını listelemek için gerekli SQL ifadesini yazınız.
+select(musteri.Madi + ' ' + musteri.Msoyadi) as musteri, araclar.model
+from alislar 
+inner join musteri on musteri.Mno = alislar.Mno
+inner join araclar on araclar.AracNo = alislar.AracNo
+
+--3.Her bir müşteriden alınan araçların sayısını listelemek için gerekli SQL ifadesini yazınız.
+select count(a.MNo) from alislar as a
+inner join musteri as m on m.Mno = a.MNo
