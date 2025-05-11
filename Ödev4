@@ -1,0 +1,168 @@
+--create database galeri;
+
+
+use galeri
+create table musteri(
+Mno int primary key identity(1,1),
+Madi nvarchar(50),
+Msoyadi nvarchar(50),
+Madres nvarchar(50),
+Mtelefon nvarchar(50)
+);
+
+create table araclar(
+Aracno int identity(1,1) primary key,
+yil int,
+model nvarchar(50),
+marka nvarchar(50),
+plaka nvarchar(50),
+fiyat float
+);
+
+create table satislar(
+satisNo int primary key not null,
+MNo int foreign key (Mno) references musteri(Mno),
+AracNo int foreign key (Aracno) references araclar(Aracno),
+SatisTarihi datetime,
+Fiyat float
+);
+
+create table alislar(
+alisNo int primary key not null,
+MNo int foreign key (Mno) references musteri(Mno),
+AracNo int foreign key (Aracno) references araclar(Aracno),
+AlisTarihi datetime,
+Fiyat float
+);
+
+insert into musteri 
+values('Fatma Nur','Kılıçkaya','Kayseri','45667')
+insert into musteri 
+values('Sıla','Aydoğdu','Ankara','12354')
+insert into musteri 
+values('İbrahim','Metin','İstanbul','78652')
+insert into musteri 
+values('Mustafa','Erdoğan','İzmir','75525')
+insert into musteri 
+values('Furkan','Altıntop','Manisa','48963')
+insert into musteri 
+values ('Ali', 'Demir', 'Tokat', '456977')
+
+select * from alislar
+insert into araclar values ( '2002' , 'GLA' ,'mercedes', '38G12', '65000');
+insert into araclar values ( '2020' , 'M5' ,'BMW', '47S21', '185000');
+insert into araclar values ( '2025' , 'EGEA' ,'Fiat', '36Z10', '1800000');
+insert into araclar values ( '2023' , 'COROLLA' ,'toyota', '58A14', '85000');
+insert into araclar values ( '2024' , 'A8' ,'audi', '30B84', '95000');
+
+select * from satislar
+insert into satislar values(1,1,1,'2024','800000');
+insert into satislar values(2,2,3,'2023','500000');
+insert into satislar values(3,3,5,'2022','20000000');
+insert into satislar values(4,4,2,'2024','30000000');
+insert into satislar values(5,6,2,'2024','30000000');
+
+select * from alislar
+insert into alislar values(3,1,2,'2025','882000');
+insert into alislar values(5,1,5,'2024','800034');
+insert into alislar values(2,1,4,'2023','8820003');
+insert into alislar values(4,1,1,'2021','88200034');
+
+--1.	Sıla Aydoğdu'ya satılan aracın aynısından başka hangi müşterilere satıldığını bulmak için kullanılacak SQL ifadesiniz yazınız.
+select (musteri.Madi +' '+ musteri.Msoyadi) as satilan_araclar
+from satislar
+Inner Join musteri on musteri.Mno = satislar.MNo
+where aracNo =
+(select AracNo from satislar
+where MNo =(select Mno from musteri 
+where Madi ='Sıla' and Msoyadi ='Aydoğdu'))
+
+--2.	Satış yapılan araçların bilgilerini listelemek için gerekli SQL ifadesiniz yazınız.
+select musteri.Madi,araclar.marka,araclar.model,
+satislar.Fiyat from satislar
+inner join musteri on musteri.Mno = satislar.MNo
+inner join araclar on araclar.Aracno = satislar.AracNo
+where araclar.AracNo in (select AracNo from araclar)
+
+--3.Satış tutarı alım tutarından düşük olan araçları listelemek için gerekli SQL ifadesini yazınız.
+select s.Fiyat, a.Fiyat, m.Madi from satislar as s
+inner join alislar as a on a.AracNo=s.AracNo
+inner join musteri as m on m.Mno=s.MNo
+where s.Fiyat < a.Fiyat
+
+SELECT s.Fiyat AS satis, a.Fiyat AS alis,m.Madi
+FROM satislar AS s
+INNER JOIN alislar AS a ON a.AracNo = s.AracNo
+INNER JOIN musteri AS m ON m.Mno = s.MNo
+WHERE s.Fiyat < (
+    SELECT MIN(Fiyat) 
+    FROM alislar 
+);
+
+--4.Opel marka araç yapılan satışların ve alımların hangi müşterilerle yapıldığını bulmak için gerekli SQL ifadesini yazınız.
+
+SELECT m.Mno, m.Madi, m.Msoyadi
+FROM musteri m
+WHERE m.Mno IN (
+    SELECT s.MNo
+    FROM satislar s
+    JOIN araclar a ON s.AracNo = a.Aracno
+    WHERE a.marka = 'Opel'
+)
+
+UNION
+
+
+SELECT m.Mno, m.Madi, m.Msoyadi
+FROM musteri m
+WHERE m.Mno IN (
+    SELECT a.MNo
+    FROM alislar a
+    JOIN araclar ar ON a.AracNo = ar.Aracno
+    WHERE ar.marka = 'Opel'
+);
+
+
+--5.Araç fiyatı 20000 den yüksek olan araçların hangi fiyata satıldığını bulmak için gerekli SQL ifadesiniz yazınız.
+SELECT a.Aracno, a.marka, a.model, a.fiyat AS AracFiyati, s.Fiyat AS SatisFiyati
+FROM araclar a
+JOIN satislar s ON a.Aracno = s.AracNo
+WHERE a.fiyat > 20000;
+
+--6.Turhal ve Amasya’ya yapılan satışların toplam tutarını azalan sırada listelemek için gerekli SQL ifadesiniz yazınız.
+SELECT m.Madres AS Sehir, SUM(s.Fiyat) AS ToplamSatisTutari
+FROM satislar s
+JOIN musteri m ON s.MNo = m.Mno
+WHERE m.Madres IN ('Turhal', 'Amasya')
+GROUP BY m.Madres;
+
+
+--7.Satış veya alım yapılmayan müşterilerin bilgilerini listelemek için gerekli SQL ifadesiniz yazınız.
+SELECT m.*
+FROM musteri m
+LEFT JOIN satislar s ON m.Mno = s.Mno
+LEFT JOIN alislar a ON m.Mno = a.Mno
+WHERE s.Mno IS NULL OR a.Mno IS NULL;
+
+--8. 5.ve 6. Ayda yapılan satışların kimlere yapıldığını bulmak için gerekli SQL ifadesiniz yazınız.
+SELECT m.Mno, m.Madi, m.Msoyadi, m.Madres, m.Mtelefon
+FROM satislar s
+JOIN musteri m ON s.MNo = m.Mno
+WHERE MONTH(s.SatisTarihi) IN (5, 6)
+GROUP BY m.Mno, m.Madi, m.Msoyadi, m.Madres, m.Mtelefon;
+
+
+--9.Aynı marka araç alan müşterileri ve aldığı araç markasını listelemek için gerekli SQL ifadesiniz yazınız.
+SELECT m.Mno, m.Madi, m.Msoyadi, a.marka, COUNT(*) AS AldigiAracSayisi
+FROM satislar s
+JOIN musteri m ON s.MNo = m.Mno
+JOIN araclar a ON s.AracNo = a.Aracno
+GROUP BY m.Mno, m.Madi, m.Msoyadi, a.marka
+HAVING COUNT(*) > 1;
+
+--10.En yüksek fiyata satılan aracın marka, fiyat ve kime satıldığı bilgisini listelemek için gerekli SQL ifadesiniz yazınız.
+SELECT a.marka,  s.Fiyat AS SatisFiyati, m.Madi, m.Msoyadi, m.Madres, m.Mtelefon
+FROM satislar s
+JOIN araclar a ON s.AracNo = a.Aracno
+JOIN musteri m ON s.MNo = m.Mno
+WHERE s.Fiyat = (SELECT MAX(Fiyat) FROM satislar);
